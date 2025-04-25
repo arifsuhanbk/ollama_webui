@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Ollama</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1>🧠 Ollama Chat</h1>
+        </header>
+
+        <div class="chat-box" id="result">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" id="inputText" placeholder="Type your message..." onkeydown="if(event.key === 'Enter') sendData();">
+            <button onclick="sendData()">Send</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
