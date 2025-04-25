@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from ollama import chat
-from ollama import ChatResponse
+from ollama import list as list_models
 
 app = Flask(__name__)
 
@@ -8,33 +8,34 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
+
+@app.route('/models')
+def get_models():
+    try:
+        models = list_models()
+        model_names = [model['model'] for model in models['models']]
+        return jsonify(model_names)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/chat', methods=['POST'])
 def process():
-    data = request.json  # Get the data from the frontend
-    
-    # Prepare the messages for the model
+    data = request.json
     user_message = data['message']
-    print(user_message)
+    model = data.get('model', 'gemma3:1b')  # Fallback if not provided
 
-    try:
-        # Use the Ollama chat function to get a response from the model
-        response: ChatResponse = chat(model='gemma3:1b', messages=[
-            {
-                'role': 'user',
-                'content': user_message
-            }
-        ])
-        
-        message_content = response['message']['content']
-        print(message_content)
+    def generate():
+        response = chat(model=model, messages=[{
+            'role': 'user',
+            'content': user_message
+        }], stream=True)
 
-        return jsonify({
-            "message": "Ollama API responded successfully",
-            "response_data": message_content
-        })
+        for chunk in response:
+            if 'message' in chunk and 'content' in chunk['message']:
+                yield chunk['message']['content']
     
-    except Exception as e:
-        return jsonify({"message": "Failed to get a response from Ollama API", "error": str(e)}), 500
+    return Response(generate(), content_type='text/plain')
 
 if __name__ == '__main__':
     app.run(debug=True)

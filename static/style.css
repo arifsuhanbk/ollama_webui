@@ -87,3 +87,7 @@ body {
 .chat-input-container button:hover {
     background-color: #0e8e6c;
 }
+
+.model-select-container {
+    margin-bottom: 10px;
+}
